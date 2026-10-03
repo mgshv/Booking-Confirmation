@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Generate an updated booking confirmation PDF from an authorized fixed template." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>Booking PDF Editor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="editor-panel">
+        <div class="brand-mark" aria-hidden="true">B</div>
+        <div class="intro">
+          <p class="eyebrow">PDF generator</p>
+          <h1>Booking confirmation</h1>
+          <p class="subhead">Create one confirmation or prepare a batch from a list of names and dates.</p>
+        </div>
+
+        <div class="mode-tabs" role="tablist" aria-label="Booking mode">
+          <button id="single-tab" class="mode-tab active" type="button" role="tab" aria-selected="true" aria-controls="booking-form">Single booking</button>
+          <button id="batch-tab" class="mode-tab" type="button" role="tab" aria-selected="false" aria-controls="batch-panel" tabindex="-1">Batch bookings</button>
+        </div>
+
+        <form id="booking-form" role="tabpanel" aria-labelledby="single-tab" novalidate>
+          <label class="field">
+            <span>Booking ID</span>
+            <div class="booking-id-control">
+              <input id="booking-id" name="bookingId" type="text" inputmode="numeric" readonly aria-readonly="true" />
+              <button id="new-booking-id" class="new-id-button" type="button">New number</button>
+            </div>
+            <small>Automatically generated: 9 digits, starting with 0 or 1.</small>
+          </label>
+
+          <label class="field">
+            <span>Client name</span>
+            <input id="client-name" name="clientName" type="text" maxlength="80" value="Muradova Nasiba" autocomplete="name" required />
+            <small>For two guests, separate names with a comma. Four words also split into two names. All-capital names are formatted automatically.</small>
+          </label>
+
+          <label class="field">
+            <span>Hotel selection</span>
+            <select id="hotel-select" name="hotelSelection" required>
+              <option value="meroddi-beyoglu">Meroddi Beyoğlu Residence</option>
+              <option value="meridiani-taksim">Meridiani Taksim Hotel</option>
+              <option value="saratoga-sultanahmet">Saratoga Hotel - Sultanahmet</option>
+              <option value="arife-sultan">Arife Sultan Hotel</option>
+              <option value="anthemis">Anthemis Hotel</option>
+              <option value="amira-istanbul">Hotel Amira Istanbul</option>
+              <option value="arven">Arven Hotel</option>
+              <option value="fehmi-bey">Hotel Fehmi Bey</option>
+              <option value="sphendon">Hotel Sphendon</option>
+              <option value="biz-cevahir-sultanahmet">Biz Cevahir Hotel Sultanahmet</option>
+              <option value="sultanahmet-cesme">Sultanahmet Cesme Hotel</option>
+              <option value="the-and">The And Hotel</option>
+              <option value="seatanbul">Seatanbul Hotel</option>
+              <option value="peninsula">Hotel Peninsula</option>
+              <option value="world-house-galata">World House Boutique Hotel Galata</option>
+              <option value="alp-guesthouse-sultanahmet">Hotel Alp Guesthouse Sultanahmet</option>
+              <option value="side">Side Hotel</option>
+              <option value="grand-palace">Grand Palace Hotel</option>
+              <option value="hhk-downtown">HHK Hotel Downtown</option>
+              <option value="lady-diana">Lady Diana Hotel</option>
+            </select>
+            <small>The property name, address, and phone number update automatically in the PDF.</small>
+          </label>
+
+          <div class="date-grid">
+            <label class="field">
+              <span>Arrival</span>
+              <input id="arrival-date" name="arrivalDate" type="date" value="2026-09-20" required />
+            </label>
+            <label class="field">
+              <span>Departure</span>
+              <input id="departure-date" name="departureDate" type="date" value="2026-11-19" required />
+            </label>
+          </div>
+
+          <div id="error-message" class="error-message" role="alert" aria-live="polite"></div>
+
+          <section class="calculation" aria-label="Price calculation">
+            <div>
+              <span>Nights</span>
+              <strong id="night-count">60</strong>
+            </div>
+            <div>
+              <span>Daily rate</span>
+              <strong id="daily-rate">EUR 50.00</strong>
+            </div>
+            <div class="total-row">
+              <span>Total payable</span>
+              <strong id="total-price">EUR 4,380.00</strong>
+            </div>
+            <p id="payment-date-copy">Payable on arrival: Sunday, 20 September 2026</p>
+          </section>
+
+          <div class="actions">
+            <button id="preview-button" class="button button-secondary" type="submit">Refresh preview</button>
+            <button id="download-button" class="button button-primary" type="button">Download PDF</button>
+          </div>
+        </form>
+
+        <section id="batch-panel" role="tabpanel" aria-labelledby="batch-tab" hidden>
+          <div class="batch-input-tools">
+            <label class="upload-button" for="batch-file">Upload .txt file</label>
+            <input id="batch-file" class="visually-hidden" type="file" accept=".txt,text/plain" />
+            <button id="batch-example" class="text-button" type="button">Load example</button>
+          </div>
+          <label class="field" for="batch-input">
+            <span>Guest names and stay dates</span>
+            <textarea id="batch-input" rows="8" spellcheck="false" placeholder="Imamova Suray&#10;25.10.2026-23.12.2026&#10;&#10;KURBANOVA EJEGUL&#10;11.11.26-10.12.26" aria-describedby="batch-help"></textarea>
+            <small id="batch-help">One name followed by its dates. Separate bookings with a new line. Years like 26 mean 2026. For two guests in one PDF, separate their names with a comma.</small>
+          </label>
+          <p class="batch-note">Each PDF gets a new booking ID and a randomly selected hotel. All-capital names become title case.</p>
+          <div id="batch-errors" class="error-message" role="alert" aria-live="polite"></div>
+          <p id="batch-status" class="batch-status" role="status" aria-live="polite">Paste your list or upload a text file to get started.</p>
+          <progress id="batch-progress" max="1" value="0" aria-label="Batch generation progress" hidden></progress>
+          <div class="batch-actions">
+            <button id="batch-generate" class="button button-primary" type="button" disabled>Generate all PDFs</button>
+            <button id="batch-stop" class="button button-secondary" type="button" hidden>Stop</button>
+            <button id="batch-download" class="button button-secondary" type="button" disabled>Download all (.zip)</button>
+          </div>
+          <section id="batch-results" class="batch-results" aria-label="Batch PDFs" hidden>
+            <div class="results-heading">
+              <h2>Your PDFs</h2>
+              <span id="batch-ready-count">0 ready</span>
+            </div>
+            <ol id="batch-list" class="batch-list"></ol>
+          </section>
+        </section>
+
+        <p class="privacy-note">The PDF is generated locally in your browser. No booking information is uploaded.</p>
+      </section>
+
+      <section class="preview-panel" aria-label="PDF preview">
+        <div class="preview-toolbar">
+          <div>
+            <p id="preview-title">Live document</p>
+            <span id="preview-status">Preparing preview…</span>
+          </div>
+          <span id="single-status-dot" class="status-dot" aria-hidden="true"></span>
+          <div id="batch-navigation" class="batch-navigation" aria-label="Browse generated PDFs" hidden>
+            <button id="batch-previous" class="navigation-button" type="button" aria-label="View previous PDF" disabled>Previous</button>
+            <span id="batch-position" aria-live="polite">0 of 0</span>
+            <button id="batch-next" class="navigation-button" type="button" aria-label="View next PDF" disabled>Next</button>
+          </div>
+        </div>
+        <div class="preview-stage">
+          <iframe id="pdf-preview" title="Generated booking confirmation PDF preview"></iframe>
+          <div id="preview-placeholder" class="preview-placeholder">
+            <div id="preview-spinner" class="spinner" aria-hidden="true"></div>
+            <p id="preview-placeholder-copy">Building your PDF preview…</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="vendor/pdf-lib.min.js"></script>
+    <script src="vendor/fontkit.umd.min.js"></script>
+    <script src="booking-utils.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
